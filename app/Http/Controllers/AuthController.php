@@ -2,18 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreUserRequest;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\RegisterUserRequest;
+use App\Services\RegisterService;
 
 class AuthController extends Controller
 {
-    public function register(StoreUserRequest $request)
+    public function register(RegisterUserRequest $request, RegisterService $registerService)
     {
-        User::query()->create([
-            'name' => $request->validated('name'),
-            'email' => $request->validated('email'),
-            'password' => Hash::make($request->validated('password')),
-        ]);
+        $registerService->register($request);
     }
 }

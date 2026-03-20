@@ -16,8 +16,14 @@ RUN apk add --no-cache \
     zip \
     unzip \
     libzip-dev \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
-
+    librdkafka-dev \
+    autoconf \
+    g++ \
+    make \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip \
+    && pecl install rdkafka \
+    && docker-php-ext-enable rdkafka \
+    && apk del autoconf g++ make
 # Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
