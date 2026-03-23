@@ -8,22 +8,33 @@ use Firebase\JWT\Key;
 
 class JwtService
 {
-    public function generate(User $user)
+    public function generateAccessToken(User $user): string
     {
-
         $payload = [
             'sub' => $user->id,
+            'name' => $user->name,
             'email' => $user->email,
+            'type' => 'access',
             'iat' => time(),
-            'exp' => time() + 3600,
+            'exp' => time() + 900,
         ];
 
-        $privateKey = file_get_contents(config('jwt.private_key'));
-
-        return JWT::encode($payload, $privateKey, config('jwt.algorithm'));
+        return JWT::encode($payload, $this->getPrivateKey(), config('jwt.algorithm'));
     }
 
-    public function decode(string $token)
+    public function generateRefreshToken(User $user): string
+    {
+        $payload = [
+            'sub' => $user->id,
+            'type' => 'refresh',
+            'iat' => time(),
+            'exp' => time() + 60 * 60 * 24 * 7,
+        ];
+
+        return JWT::encode($payload, $this->getPrivateKey(), config('jwt.algorithm'));
+    }
+
+    public function decode(string $token): \stdClass
     {
         return JWT::decode(
             $token,
@@ -32,5 +43,10 @@ class JwtService
                 config('jwt.algorithm')
             )
         );
+    }
+
+    private function getPrivateKey(): string
+    {
+        return file_get_contents(config('jwt.private_key'));
     }
 }

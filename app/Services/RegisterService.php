@@ -15,7 +15,7 @@ class RegisterService
     {
     }
 
-    public function register(RegisterUserRequest $request): void
+    public function register(RegisterUserRequest $request): User
     {
         $user = User::query()->create([
             'name' => $request->validated('name'),
@@ -24,5 +24,7 @@ class RegisterService
         ]);
 
         $this->eventDispatcher->dispatch(new UserCreatedEvent($user));
+
+        return $user;
     }
 }

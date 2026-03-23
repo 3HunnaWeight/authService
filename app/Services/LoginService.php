@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\InvalidCredentials;
 use App\Http\Requests\LoginUserRequest;
+use App\Models\RefreshToken;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -23,10 +24,14 @@ class LoginService
             throw new InvalidCredentials();
         }
 
-        $token = $this->jwtService->generate($user);
+        $accessToken = $this->jwtService->generateAccessToken($user);
+        $refreshToken = $this->jwtService->generateRefreshToken($user);
+
+        RefreshToken::createForUser($user->id, $refreshToken);
 
         return [
-            'access_token' => $token,
+            'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
             'user' => [
                 'id' => $user->id,
                 'email' => $user->email,
