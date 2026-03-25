@@ -31,30 +31,30 @@ services:
     networks:
       - shared-network
 
-  kafka-init:
-    image: confluentinc/cp-kafka:7.6.0
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8090:8080"
     depends_on:
       - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
     networks:
       - shared-network
-    entrypoint: /bin/sh
-    command: -c "
-      echo '⏳ Waiting for Kafka...';
 
-      while ! kafka-topics --bootstrap-server kafka:9092 --list > /dev/null 2>&1; do
-      echo 'Kafka not ready yet...';
-      sleep 2;
-      done;
-
-      echo '🚀 Creating topics...';
-
-      kafka-topics --create --if-not-exists \
-      --topic users.events \
-      --bootstrap-server kafka:9092 \
-      --partitions 3 \
-      --replication-factor 1;
-
-      echo '✅ Done';"
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka-init
+    depends_on:
+      - kafka
+    volumes:
+      - ./docker/scripts:/scripts
+    entrypoint: [ "/bin/bash", "/scripts/create-topics.sh" ]
+    networks:
+      - shared-network
+    restart: "no"
 
 networks:
   shared-network:

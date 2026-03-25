@@ -7,11 +7,6 @@ use Illuminate\Validation\Rules\Password;
 
 class RegisterUserRequest extends FormRequest
 {
-//    public function authorize(): bool
-//    {
-//        return true;
-//    }
-
 
     public function rules(): array
     {
